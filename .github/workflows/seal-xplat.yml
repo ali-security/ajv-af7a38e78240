@@ -1,0 +1,35 @@
+name: seal-xplat
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    name: build_${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['14', '12', '10']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: pin registry time machine
+        run: npm config set registry https://:2020-09-13T16%3A23%3A15.885000Z@time-machines-npm.sealsecurity.io/
+      - run: npm install --ignore-scripts
+      - run: npm run build
+      - run: npm run test-spec
+      - name: bundle
+        if: matrix.node == '14'
+        run: npm run bundle
+      - name: pack
+        if: matrix.node == '14'
+        run: npm pack
+      - name: upload
+        if: matrix.node == '14'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ajv-tgz
+          path: ajv-6.12.5.tgz
+          if-no-files-found: error
