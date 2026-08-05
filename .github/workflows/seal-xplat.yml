@@ -1,5 +1,6 @@
 name: seal-xplat
-on: [push, workflow_dispatch]
+on:
+  workflow_dispatch:
 jobs:
   build:
     name: build_${{ matrix.node }}
@@ -9,6 +10,8 @@ jobs:
       matrix:
         node: ['14', '12', '10']
     steps:
+      - name: Configure npm time machine registry
+        run: npm config set registry https://:2020-09-13T16%3A23%3A15.885000Z@time-machines-npm.sealsecurity.io/
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -33,3 +36,4 @@ jobs:
           name: ajv-tgz
           path: ajv-6.12.5.tgz
           if-no-files-found: error
+    timeout-minutes: 40
